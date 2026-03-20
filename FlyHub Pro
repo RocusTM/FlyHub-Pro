@@ -1,0 +1,238 @@
+-- FlyHub Pro v1.6 (Single File)
+
+local player = game.Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local speed = 50
+local bypass = false
+local noclip = false
+local flyKey = Enum.KeyCode.F
+
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+
+local Main = Instance.new("Frame", ScreenGui)
+Main.Size = UDim2.new(0, 400, 0, 280)
+Main.Position = UDim2.new(0.3, 0, 0.3, 0)
+Main.BackgroundColor3 = Color3.fromRGB(10,20,60)
+Main.Active = true
+Main.Draggable = true
+
+local MiniCircle = Instance.new("TextButton", ScreenGui)
+MiniCircle.Size = UDim2.new(0,50,0,50)
+MiniCircle.Position = UDim2.new(0,20,0.5,0)
+MiniCircle.BackgroundColor3 = Color3.fromRGB(20,40,120)
+MiniCircle.Text = "+"
+MiniCircle.TextColor3 = Color3.new(1,1,1)
+MiniCircle.Visible = false
+
+-- Drag Mini
+local draggingMini, dragInput, dragStart, startPos
+
+MiniCircle.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		draggingMini = true
+		dragStart = input.Position
+		startPos = MiniCircle.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				draggingMini = false
+			end
+		end)
+	end
+end)
+
+MiniCircle.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if input == dragInput and draggingMini then
+		local delta = input.Position - dragStart
+		MiniCircle.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+local Title = Instance.new("TextLabel", Main)
+Title.Text = "FlyHub Pro"
+Title.Size = UDim2.new(1,0,0,40)
+Title.BackgroundTransparency = 1
+Title.TextColor3 = Color3.new(1,1,1)
+
+local HelpBtn = Instance.new("TextButton", Main)
+HelpBtn.Text = "?"
+HelpBtn.Size = UDim2.new(0,40,0,40)
+HelpBtn.Position = UDim2.new(1,-120,0,0)
+HelpBtn.BackgroundColor3 = Color3.fromRGB(30,60,150)
+HelpBtn.TextColor3 = Color3.new(1,1,1)
+
+HelpBtn.MouseButton1Click:Connect(function()
+	local msg = Instance.new("TextLabel", ScreenGui)
+	msg.Size = UDim2.new(0,300,0,50)
+	msg.Position = UDim2.new(0.5,-150,0.1,0)
+	msg.BackgroundColor3 = Color3.fromRGB(20,40,120)
+	msg.TextColor3 = Color3.new(1,1,1)
+	msg.Text = "Thank you for using FlyHub Pro"
+	msg.TextScaled = true
+	task.delay(2, function() msg:Destroy() end)
+end)
+
+local Close = Instance.new("TextButton", Main)
+Close.Text = "X"
+Close.Size = UDim2.new(0,40,0,40)
+Close.Position = UDim2.new(1,-40,0,0)
+Close.BackgroundColor3 = Color3.fromRGB(30,60,150)
+Close.TextColor3 = Color3.new(1,1,1)
+
+local Minimize = Instance.new("TextButton", Main)
+Minimize.Text = "-"
+Minimize.Size = UDim2.new(0,40,0,40)
+Minimize.Position = UDim2.new(1,-80,0,0)
+Minimize.BackgroundColor3 = Color3.fromRGB(30,60,150)
+Minimize.TextColor3 = Color3.new(1,1,1)
+
+local Content = Instance.new("Frame", Main)
+Content.Size = UDim2.new(1,0,1,-40)
+Content.Position = UDim2.new(0,0,0,40)
+Content.BackgroundColor3 = Color3.fromRGB(15,30,80)
+
+local FlyToggle = Instance.new("TextButton", Content)
+FlyToggle.Text = "Fly: OFF"
+FlyToggle.Size = UDim2.new(0,150,0,40)
+FlyToggle.Position = UDim2.new(0,20,0,20)
+FlyToggle.BackgroundColor3 = Color3.fromRGB(30,60,150)
+FlyToggle.TextColor3 = Color3.new(1,1,1)
+
+local BypassToggle = Instance.new("TextButton", Content)
+BypassToggle.Text = "Bypass: OFF"
+BypassToggle.Size = UDim2.new(0,150,0,40)
+BypassToggle.Position = UDim2.new(0,20,0,70)
+BypassToggle.BackgroundColor3 = Color3.fromRGB(30,60,150)
+BypassToggle.TextColor3 = Color3.new(1,1,1)
+
+local NoclipToggle = Instance.new("TextButton", Content)
+NoclipToggle.Text = "Noclip While Flying: OFF"
+NoclipToggle.Size = UDim2.new(0,200,0,40)
+NoclipToggle.Position = UDim2.new(0,20,0,120)
+NoclipToggle.BackgroundColor3 = Color3.fromRGB(30,60,150)
+NoclipToggle.TextColor3 = Color3.new(1,1,1)
+
+local SliderFrame = Instance.new("Frame", Content)
+SliderFrame.Size = UDim2.new(0,200,0,20)
+SliderFrame.Position = UDim2.new(0,20,0,180)
+SliderFrame.BackgroundColor3 = Color3.fromRGB(20,40,120)
+
+local SliderButton = Instance.new("TextButton", SliderFrame)
+SliderButton.Size = UDim2.new(0,20,1,0)
+SliderButton.BackgroundColor3 = Color3.fromRGB(80,120,255)
+
+local SpeedLabel = Instance.new("TextLabel", Content)
+SpeedLabel.Text = "Speed: 50"
+SpeedLabel.Position = UDim2.new(0,20,0,210)
+SpeedLabel.Size = UDim2.new(0,200,0,20)
+SpeedLabel.BackgroundTransparency = 1
+SpeedLabel.TextColor3 = Color3.new(1,1,1)
+
+Close.MouseButton1Click:Connect(function()
+	ScreenGui:Destroy()
+end)
+
+Minimize.MouseButton1Click:Connect(function()
+	Main.Visible = false
+	MiniCircle.Visible = true
+end)
+
+MiniCircle.MouseButton1Click:Connect(function()
+	Main.Visible = true
+	MiniCircle.Visible = false
+end)
+
+BypassToggle.MouseButton1Click:Connect(function()
+	bypass = not bypass
+	BypassToggle.Text = "Bypass: "..(bypass and "ON" or "OFF")
+end)
+
+NoclipToggle.MouseButton1Click:Connect(function()
+	noclip = not noclip
+	NoclipToggle.Text = "Noclip While Flying: "..(noclip and "ON" or "OFF")
+end)
+
+local dragging = false
+
+SliderButton.MouseButton1Down:Connect(function()
+	dragging = true
+end)
+
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local pos = math.clamp((input.Position.X - SliderFrame.AbsolutePosition.X) / SliderFrame.AbsoluteSize.X,0,1)
+		SliderButton.Position = UDim2.new(pos,-10,0,0)
+		speed = bypass and math.floor(1 + (99999 * pos)) or math.floor(1 + (99 * pos))
+		SpeedLabel.Text = "Speed: "..speed
+	end
+end)
+
+local flying = false
+local bv, bg
+
+FlyToggle.MouseButton1Click:Connect(function()
+	flying = not flying
+	local char = player.Character
+	if not char then return end
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+	
+	if flying then
+		FlyToggle.Text = "Fly: ON"
+		bv = Instance.new("BodyVelocity", hrp)
+		bv.MaxForce = Vector3.new(9e9,9e9,9e9)
+		bg = Instance.new("BodyGyro", hrp)
+		bg.MaxTorque = Vector3.new(9e9,9e9,9e9)
+	else
+		FlyToggle.Text = "Fly: OFF"
+		if bv then bv:Destroy() end
+		if bg then bg:Destroy() end
+	end
+end)
+
+UIS.InputBegan:Connect(function(input, gpe)
+	if not gpe and input.KeyCode == flyKey then
+		FlyToggle.MouseButton1Click:Fire()
+	end
+end)
+
+RunService.Stepped:Connect(function()
+	local char = player.Character
+	if not char then return end
+	
+	for _,v in pairs(char:GetDescendants()) do
+		if v:IsA("BasePart") then
+			v.CanCollide = (not flying or not noclip)
+		end
+	end
+end)
+
+RunService.RenderStepped:Connect(function()
+	if flying and bv and bg then
+		local cam = workspace.CurrentCamera
+		local move = Vector3.new()
+		
+		if UIS:IsKeyDown(Enum.KeyCode.W) then move += cam.CFrame.LookVector end
+		if UIS:IsKeyDown(Enum.KeyCode.S) then move -= cam.CFrame.LookVector end
+		if UIS:IsKeyDown(Enum.KeyCode.A) then move -= cam.CFrame.RightVector end
+		if UIS:IsKeyDown(Enum.KeyCode.D) then move += cam.CFrame.RightVector end
+		if UIS:IsKeyDown(Enum.KeyCode.Space) then move += Vector3.new(0,1,0) end
+		if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then move -= Vector3.new(0,1,0) end
+		
+		bv.Velocity = move * speed
+		bg.CFrame = cam.CFrame
+	end
+end)
