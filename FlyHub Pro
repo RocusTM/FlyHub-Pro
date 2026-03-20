@@ -1,4 +1,4 @@
--- FlyHub Pro v1.6 (Single File)
+-- FlyHub Pro v1.6
 
 local player = game.Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
